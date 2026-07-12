@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Package Moodle plugin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Read Moodle plugin version
+        id: version
+        run: |
+          php <<'PHP' >> "$GITHUB_OUTPUT"
+          <?php
+          $version = file_get_contents('version.php');
+          if (!preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $matches)) {
+              fwrite(STDERR, "Could not read plugin version from version.php.\n");
+              exit(1);
+          }
+          echo "moodle_version={$matches[1]}\n";
+          echo "zip_name=moodle-local_blueprints-{$matches[1]}.zip\n";
+          PHP
+
+      - name: Build Moodle plugin zip
+        run: |
+          mkdir -p build/blueprints
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.agents/' \
+            --exclude='.codex/' \
+            --exclude='build/' \
+            ./ build/blueprints/
+          cd build
+          zip -r "${{ steps.version.outputs.zip_name }}" blueprints
+
+      - name: Upload zip to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/${{ steps.version.outputs.zip_name }}
+
+      - name: Upload zip artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.zip_name }}
+          path: build/${{ steps.version.outputs.zip_name }}

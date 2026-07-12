@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  php-checks:
+    name: PHP checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Lint PHP files
+        run: |
+          find . -path './.git' -prune -o -name '*.php' -print0 \
+            | xargs -0 -n 1 php -l
+
+      - name: Validate plugin metadata
+        run: |
+          php <<'PHP'
+          <?php
+          $version = file_get_contents('version.php');
+          if (!preg_match("/\\$plugin->component\\s*=\\s*'local_blueprints';/", $version)) {
+              fwrite(STDERR, "version.php must declare component local_blueprints.\n");
+              exit(1);
+          }
+          if (!preg_match('/\\$plugin->version\\s*=\\s*(\\d+);/', $version, $matches)) {
+              fwrite(STDERR, "version.php must declare a numeric plugin version.\n");
+              exit(1);
+          }
+          if (!is_dir('lang/en') || !is_file('lang/en/local_blueprints.php')) {
+              fwrite(STDERR, "Missing English language file.\n");
+              exit(1);
+          }
+          echo "local_blueprints version {$matches[1]} metadata looks good.\n";
+          PHP
+
