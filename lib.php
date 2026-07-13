@@ -88,26 +88,20 @@ function local_blueprints_destination_categories(): array {
 }
 
 function local_blueprints_course_image_url(int $courseid): ?moodle_url {
-    $context = context_course::instance($courseid, IGNORE_MISSING);
-    if (!$context) {
-        return null;
-    }
+    global $CFG;
 
-    $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'course', 'overviewfiles', 0, 'sortorder, id', false);
+    $course = new core_course_list_element(get_course($courseid));
 
-    foreach ($files as $file) {
-        if (strpos($file->get_mimetype(), 'image/') !== 0) {
+    foreach ($course->get_course_overviewfiles() as $file) {
+        if (!$file->is_valid_image()) {
             continue;
         }
 
-        return moodle_url::make_pluginfile_url(
-            $file->get_contextid(),
-            $file->get_component(),
-            $file->get_filearea(),
-            $file->get_itemid(),
-            $file->get_filepath(),
-            $file->get_filename()
+        return moodle_url::make_file_url(
+            "$CFG->wwwroot/pluginfile.php",
+            '/' . $file->get_contextid() . '/' . $file->get_component() . '/' .
+                $file->get_filearea() . $file->get_filepath() . $file->get_filename(),
+            false
         );
     }
 
@@ -296,6 +290,7 @@ function local_blueprints_before_footer(): string {
 
             var target = document.querySelector([
                 '#action_bar',
+                '[data-region=\"header-actions-container\"]',
                 '.coursecat-management-buttons',
                 '.page-header-actions',
                 '.buttons'
