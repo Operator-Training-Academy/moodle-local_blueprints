@@ -27,16 +27,13 @@ jobs:
       - name: Read Moodle plugin version
         id: version
         run: |
-          php <<'PHP' >> "$GITHUB_OUTPUT"
-          <?php
-          $version = file_get_contents('version.php');
-          if (!preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $matches)) {
-              fwrite(STDERR, "Could not read plugin version from version.php.\n");
-              exit(1);
-          }
-          echo "moodle_version={$matches[1]}\n";
-          echo "zip_name=moodle-local_blueprints-{$matches[1]}.zip\n";
-          PHP
+          version="$(sed -n "s/.*\$plugin->version[[:space:]]*=[[:space:]]*\([0-9][0-9]*\);.*/\1/p" version.php)"
+          if [ -z "$version" ]; then
+            echo "Could not read plugin version from version.php." >&2
+            exit 1
+          fi
+          echo "moodle_version=${version}" >> "$GITHUB_OUTPUT"
+          echo "zip_name=moodle-local_blueprints-${version}.zip" >> "$GITHUB_OUTPUT"
 
       - name: Build Moodle plugin zip
         run: |

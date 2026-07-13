@@ -29,21 +29,21 @@ jobs:
 
       - name: Validate plugin metadata
         run: |
-          php <<'PHP'
-          <?php
-          $version = file_get_contents('version.php');
-          if (!preg_match("/\\$plugin->component\\s*=\\s*'local_blueprints';/", $version)) {
-              fwrite(STDERR, "version.php must declare component local_blueprints.\n");
-              exit(1);
-          }
-          if (!preg_match('/\\$plugin->version\\s*=\\s*(\\d+);/', $version, $matches)) {
-              fwrite(STDERR, "version.php must declare a numeric plugin version.\n");
-              exit(1);
-          }
-          if (!is_dir('lang/en') || !is_file('lang/en/local_blueprints.php')) {
-              fwrite(STDERR, "Missing English language file.\n");
-              exit(1);
-          }
-          echo "local_blueprints version {$matches[1]} metadata looks good.\n";
-          PHP
+          component="$(sed -n "s/.*\$plugin->component[[:space:]]*=[[:space:]]*'\([^']*\)';.*/\1/p" version.php)"
+          if [ "$component" != "local_blueprints" ]; then
+            echo "version.php must declare component local_blueprints." >&2
+            exit 1
+          fi
 
+          version="$(sed -n "s/.*\$plugin->version[[:space:]]*=[[:space:]]*\([0-9][0-9]*\);.*/\1/p" version.php)"
+          if [ -z "$version" ]; then
+            echo "version.php must declare a numeric plugin version." >&2
+            exit 1
+          fi
+
+          if [ ! -f lang/en/local_blueprints.php ]; then
+            echo "Missing English language file." >&2
+            exit 1
+          fi
+
+          echo "local_blueprints version ${version} metadata looks good."
