@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_blueprints';
-$plugin->version = 2026071301;
+$plugin->version = 2026071302;
 $plugin->requires = 2022041900;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->release = 'v0.3';
