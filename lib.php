@@ -256,7 +256,9 @@ function local_blueprints_before_footer(): string {
     }
 
     $pagetype = $PAGE->pagetype ?? '';
-    if (!in_array($pagetype, ['course-index-category', 'course-management', 'my-index'], true)) {
+    $pagepath = $PAGE->url->get_path(false);
+    if (!in_array($pagetype, ['course-index-category', 'course-management', 'my-index', 'my-courses'], true)
+            && $pagepath !== '/my/courses.php') {
         return '';
     }
 
@@ -277,13 +279,6 @@ function local_blueprints_before_footer(): string {
         'data-local-blueprints-launch' => '1',
     ]);
 
-    $css = '
-        a[href*="/course/edit.php?category="],
-        form[action*="/course/edit.php"] {
-            display: none !important;
-        }
-    ';
-
     $jsbutton = json_encode($button);
     $js = "
         (function() {
@@ -291,7 +286,14 @@ function local_blueprints_before_footer(): string {
             if (document.querySelector('[data-local-blueprints-launch]')) {
                 return;
             }
-            var target = document.querySelector('.coursecat-management-buttons, .buttons, .singlebutton, [data-region=\"course-content\"]');
+            var target = document.querySelector([
+                '.page-header-actions',
+                '.coursecat-management-buttons',
+                '#page-header .card-body',
+                '.buttons',
+                '[data-region=\"course-content\"]',
+                '#region-main'
+            ].join(', '));
             if (target) {
                 target.insertAdjacentHTML('afterbegin', button);
             }
@@ -299,5 +301,5 @@ function local_blueprints_before_footer(): string {
     ";
 
     $PAGE->requires->js_init_code($js);
-    return html_writer::tag('style', $css);
+    return '';
 }
