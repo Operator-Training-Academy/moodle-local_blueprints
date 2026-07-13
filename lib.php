@@ -278,6 +278,7 @@ function local_blueprints_before_footer(): string {
         'class' => 'btn btn-primary local-blueprints-launch',
         'data-local-blueprints-launch' => '1',
     ]);
+    $button = html_writer::div($button, 'singlebutton local-blueprints-singlebutton');
 
     $jsbutton = json_encode($button);
     $js = "
@@ -286,16 +287,21 @@ function local_blueprints_before_footer(): string {
             if (document.querySelector('[data-local-blueprints-launch]')) {
                 return;
             }
+            var createForm = document.querySelector('form[action*=\"/course/edit.php\"]');
+            if (createForm) {
+                var createButton = createForm.closest('.singlebutton') || createForm;
+                createButton.insertAdjacentHTML('afterend', button);
+                return;
+            }
+
             var target = document.querySelector([
-                '.page-header-actions',
+                '#action_bar',
                 '.coursecat-management-buttons',
-                '#page-header .card-body',
-                '.buttons',
-                '[data-region=\"course-content\"]',
-                '#region-main'
+                '.page-header-actions',
+                '.buttons'
             ].join(', '));
             if (target) {
-                target.insertAdjacentHTML('afterbegin', button);
+                target.insertAdjacentHTML('beforeend', button);
             }
         }());
     ";
