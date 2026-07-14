@@ -36,7 +36,7 @@ $PAGE->set_heading(get_string('createfromblueprint', 'local_blueprints'));
 require_once(__DIR__ . '/classes/form/create_form.php');
 
 $requestedstep = optional_param('step', 1, PARAM_INT);
-$requestedstep = min(4, max(1, $requestedstep));
+$requestedstep = min(3, max(1, $requestedstep));
 $displaystep = $requestedstep;
 
 $SESSION->local_blueprints_wizard ??= [];
@@ -90,7 +90,7 @@ if ($isback) {
     }
 
     if ($isnext) {
-        $displaystep = min(4, $requestedstep + 1);
+        $displaystep = min(3, $requestedstep + 1);
     } else {
         require_sesskey();
         $destinationcontext = context_coursecat::instance((int)$formdata['categoryid']);
@@ -130,6 +130,5 @@ if ($displaystep !== $requestedstep) {
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($blueprint->fullname), 3);
 $mform->display();
 echo $OUTPUT->footer();

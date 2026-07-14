@@ -72,6 +72,88 @@
     white-space: normal;
 }
 
+.local-blueprints-progress {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    margin: 0 auto 1rem;
+    max-width: 480px;
+    padding: 0;
+    position: relative;
+    width: min(100%, 480px);
+}
+
+.local-blueprints-progress::before,
+.local-blueprints-progress::after {
+    border-radius: 999px;
+    content: "";
+    height: 8px;
+    left: 22px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.local-blueprints-progress::before {
+    background: #d6dee7;
+    right: 22px;
+    z-index: 0;
+}
+
+.local-blueprints-progress::after {
+    background: #1f7a4d;
+    transition: width .18s ease;
+    width: 0;
+    z-index: 1;
+}
+
+.local-blueprints-progress-step-2::after {
+    width: calc((100% - 44px) / 2);
+}
+
+.local-blueprints-progress-step-3::after {
+    width: calc(100% - 44px);
+}
+
+.local-blueprints-progress-item {
+    align-items: center;
+    display: flex;
+    flex: 0 0 44px;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.local-blueprints-progress-number {
+    align-items: center;
+    background: #fff;
+    border: 3px solid #c8d1dc;
+    border-radius: 50%;
+    color: #52616f;
+    display: flex;
+    font-weight: 700;
+    height: 44px;
+    justify-content: center;
+    line-height: 1;
+    position: relative;
+    width: 44px;
+    z-index: 1;
+}
+
+.local-blueprints-progress-item.is-complete .local-blueprints-progress-number {
+    background: #1f7a4d;
+    border-color: #1f7a4d;
+    color: #fff;
+}
+
+.local-blueprints-progress-item.is-active .local-blueprints-progress-number {
+    background: #0f6cbf;
+    border-color: #0f6cbf;
+    box-shadow: 0 0 0 4px rgba(15, 108, 191, .16);
+    color: #fff;
+}
+
 .local-blueprints-create-steps {
     display: grid;
     gap: 1rem;
