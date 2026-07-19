@@ -139,8 +139,10 @@ function local_blueprints_disable_user_data_settings($plan): void {
         'badges',
         'calendars',
         'comments',
+        'enrolments',
         'grade_histories',
         'logs',
+        'permissions',
         'role_assignments',
         'users',
         'userscompletion',
@@ -299,28 +301,28 @@ function local_blueprints_clone_course(
     return $newcourseid;
 }
 
-function local_blueprints_before_footer(): string {
-    global $PAGE, $OUTPUT;
+function local_blueprints_enqueue_launch_button(): void {
+    global $PAGE;
 
     if (!isloggedin() || isguestuser()) {
-        return '';
+        return;
     }
 
     $pagetype = $PAGE->pagetype ?? '';
     $pagepath = $PAGE->url->get_path(false);
     if (!in_array($pagetype, ['course-index-category', 'course-management', 'my-index', 'my-courses'], true)
             && $pagepath !== '/my/courses.php') {
-        return '';
+        return;
     }
 
     $root = local_blueprints_root_category();
     if (!$root) {
-        return '';
+        return;
     }
 
     $context = context_coursecat::instance($root->id);
     if (!has_capability('local/blueprints:createfromblueprint', $context)) {
-        return '';
+        return;
     }
 
     $url = new moodle_url('/local/blueprints/index.php');
@@ -359,5 +361,4 @@ function local_blueprints_before_footer(): string {
     ";
 
     $PAGE->requires->js_init_code($js);
-    return '';
 }

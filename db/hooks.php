@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the local_blueprints plugin.
+ * Hook registrations for the local_blueprints plugin.
  *
  * @package   local_blueprints
  * @copyright 2026, Operator Training Academy <otancoic@operatortraining.academy>
@@ -24,8 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_blueprints';
-$plugin->version = 2026072003;
-$plugin->requires = 2022041900;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = 'v0.5rc5';
+$callbacks = [
+    [
+        'hook' => \core\hook\output\before_footer_html_generation::class,
+        'callback' => '\local_blueprints\local\hook_callbacks::before_footer_html_generation',
+        'priority' => 100,
+    ],
+];
