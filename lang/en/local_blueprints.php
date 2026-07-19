@@ -43,6 +43,7 @@ $string['privacy:metadata'] = 'The Blueprints plugin does not store personal dat
 $string['progress'] = 'Course creation progress';
 $string['rootcategoryid'] = 'Blueprint root category ID';
 $string['rootcategoryid_desc'] = 'Courses in this category and its subcategories are shown as course blueprints.';
+$string['restoreprecheckfailed'] = 'Moodle restore precheck failed: {$a}';
 $string['search'] = 'Search blueprints';
 $string['searchplaceholder'] = 'Search blueprint courses';
 $string['selectblueprint'] = 'Select a blueprint';

@@ -165,6 +165,36 @@ function local_blueprints_disable_user_data_settings($plan): void {
     }
 }
 
+function local_blueprints_restore_precheck_message(array $results): string {
+    $messages = [];
+
+    foreach (['errors', 'warnings'] as $type) {
+        if (empty($results[$type])) {
+            continue;
+        }
+
+        foreach ((array)$results[$type] as $result) {
+            if (is_scalar($result)) {
+                $message = (string)$result;
+            } else {
+                $message = json_encode($result);
+                if ($message === false) {
+                    $message = print_r($result, true);
+                }
+            }
+
+            $message = trim(strip_tags($message));
+            if ($message === '') {
+                continue;
+            }
+
+            $messages[] = ucfirst(rtrim($type, 's')) . ': ' . $message;
+        }
+    }
+
+    return implode(' ', $messages);
+}
+
 function local_blueprints_clone_course(
     int $blueprintid,
     string $fullname,
@@ -229,8 +259,14 @@ function local_blueprints_clone_course(
 
         $precheck = $restore->execute_precheck();
         if (!$precheck) {
+            $results = $restore->get_precheck_results();
+            $details = local_blueprints_restore_precheck_message($results);
+            debugging(
+                'local_blueprints restore precheck failed: ' . ($details ?: json_encode($results)),
+                DEBUG_DEVELOPER
+            );
             $restore->destroy();
-            throw new moodle_exception('restoreprecheckerror', 'backup');
+            throw new moodle_exception('restoreprecheckfailed', 'local_blueprints', '', $details);
         }
 
         $restore->execute_plan();
