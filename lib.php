@@ -144,6 +144,7 @@ function local_blueprints_disable_user_data_settings($plan): void {
         'logs',
         'permissions',
         'role_assignments',
+        'roles',
         'users',
         'userscompletion',
     ];
@@ -155,7 +156,9 @@ function local_blueprints_disable_user_data_settings($plan): void {
 
         $name = $setting->get_name();
         $isuserinfo = substr($name, -9) === '_userinfo';
-        if (!in_array($name, $userdata, true) && !$isuserinfo) {
+        $isroledata = strpos($name, 'role') !== false || strpos($name, 'permission') !== false;
+        $isenrolmentdata = strpos($name, 'enrol') !== false;
+        if (!in_array($name, $userdata, true) && !$isuserinfo && !$isroledata && !$isenrolmentdata) {
             continue;
         }
 
@@ -195,6 +198,22 @@ function local_blueprints_restore_precheck_message(array $results): string {
     }
 
     return implode(' ', $messages);
+}
+
+function local_blueprints_restore_precheck_has_errors(array $results): bool {
+    if (empty($results['errors'])) {
+        return false;
+    }
+
+    foreach ((array)$results['errors'] as $error) {
+        if (is_scalar($error) && trim((string)$error) === '') {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 function local_blueprints_clone_course(
@@ -264,11 +283,13 @@ function local_blueprints_clone_course(
             $results = $restore->get_precheck_results();
             $details = local_blueprints_restore_precheck_message($results);
             debugging(
-                'local_blueprints restore precheck failed: ' . ($details ?: json_encode($results)),
+                'local_blueprints restore precheck returned warnings/errors: ' . ($details ?: json_encode($results)),
                 DEBUG_DEVELOPER
             );
-            $restore->destroy();
-            throw new moodle_exception('restoreprecheckfailed', 'local_blueprints', '', $details);
+            if (local_blueprints_restore_precheck_has_errors($results)) {
+                $restore->destroy();
+                throw new moodle_exception('restoreprecheckfailed', 'local_blueprints', '', $details);
+            }
         }
 
         $restore->execute_plan();
