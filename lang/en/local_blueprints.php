@@ -38,6 +38,7 @@ $string['missingrootcategory'] = 'Set a blueprint root category in the local Blu
 $string['noblueprints'] = 'No blueprint courses were found here.';
 $string['next'] = 'Next';
 $string['permissionerror'] = 'You do not have permission to create courses from blueprints in this category.';
+$string['plugindescription'] = 'A course blueprint system that lets administrators designate courses as reusable templates. Users can browse, search, and clone blueprints into new empty courses via a guided 3-step wizard — no direct backup/restore required.';
 $string['pluginname'] = 'Blueprints';
 $string['privacy:metadata'] = 'The Blueprints plugin does not store personal data.';
 $string['progress'] = 'Course creation progress';
