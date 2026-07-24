@@ -325,6 +325,10 @@ function local_blueprints_clone_course(
 function local_blueprints_enqueue_launch_button(): void {
     global $PAGE;
 
+    if (!get_config('local_blueprints', 'showbutton')) {
+        return;
+    }
+
     if (!isloggedin() || isguestuser()) {
         return;
     }

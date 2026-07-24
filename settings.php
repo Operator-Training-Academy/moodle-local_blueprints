@@ -35,6 +35,13 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'local_blueprints/showbutton',
+        get_string('showbutton', 'local_blueprints'),
+        get_string('showbutton_desc', 'local_blueprints'),
+        1
+    ));
+
     $settings->add(new admin_setting_configtext(
         'local_blueprints/shortnameplaceholder',
         get_string('shortnameplaceholder', 'local_blueprints'),
