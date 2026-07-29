@@ -105,17 +105,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
 
-$PAGE->requires->js_init_code("
-    (function() {
-        var category = document.querySelector('#local-blueprints-category[data-autosubmit]');
-        if (!category) {
-            return;
-        }
-        category.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }());
-");
+$PAGE->requires->js_call_amd('local_blueprints/category_filter', 'init');
 
 if (!$blueprints) {
     echo $OUTPUT->notification(get_string('noblueprints', 'local_blueprints'), 'info');

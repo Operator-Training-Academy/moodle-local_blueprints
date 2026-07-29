@@ -19,8 +19,6 @@ A course blueprint system for Moodle that lets administrators designate courses 
 |---|---|
 | ![Blueprint Browser](screenshots/browser.png) | ![Creation Wizard](screenshots/wizard.png) |
 
-*Add your screenshots to the `screenshots/` folder to display them here.*
-
 ## Requirements
 
 - Moodle 4.0 or later
@@ -89,7 +87,11 @@ This plugin implements the `\core_privacy\local\metadata\null_provider` — it d
 
 ## License
 
-[GNU General Public License v3 or later](http://www.gnu.org/copyleft/gpl.html)
+[GNU General Public License v3 or later](LICENSE)
+
+## Support
+
+Report bugs and request features through the [public issue tracker](https://github.com/Operator-Training-Academy/moodle-local_blueprints/issues).
 
 ## Author
 
