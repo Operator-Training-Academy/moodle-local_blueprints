@@ -300,6 +300,7 @@ function local_blueprints_clone_course(
             'fullname' => $fullname,
             'shortname' => $shortname,
             'startdate' => $startdate,
+            'visible' => $CFG->coursevisible ?? 1,
         ]);
     } catch (Throwable $e) {
         delete_course($newcourseid, false);
