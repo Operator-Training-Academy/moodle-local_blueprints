@@ -139,7 +139,6 @@ function local_blueprints_disable_user_data_settings($plan): void {
         'badges',
         'calendars',
         'comments',
-        'enrolments',
         'grade_histories',
         'logs',
         'permissions',
@@ -157,8 +156,7 @@ function local_blueprints_disable_user_data_settings($plan): void {
         $name = $setting->get_name();
         $isuserinfo = substr($name, -9) === '_userinfo';
         $isroledata = strpos($name, 'role') !== false || strpos($name, 'permission') !== false;
-        $isenrolmentdata = strpos($name, 'enrol') !== false;
-        if (!in_array($name, $userdata, true) && !$isuserinfo && !$isroledata && !$isenrolmentdata) {
+        if (!in_array($name, $userdata, true) && !$isuserinfo && !$isroledata) {
             continue;
         }
 
@@ -167,6 +165,26 @@ function local_blueprints_disable_user_data_settings($plan): void {
         }
 
         $setting->set_value(false);
+    }
+}
+
+function local_blueprints_restore_enrolment_methods($plan): void {
+    if (!method_exists($plan, 'get_settings')) {
+        return;
+    }
+
+    foreach ($plan->get_settings() as $setting) {
+        if (!method_exists($setting, 'get_name') || !method_exists($setting, 'set_value') ||
+                $setting->get_name() !== 'enrolments') {
+            continue;
+        }
+
+        if (method_exists($setting, 'get_status') && $setting->get_status() !== base_setting::NOT_LOCKED) {
+            return;
+        }
+
+        $setting->set_value(backup::ENROL_ALWAYS);
+        return;
     }
 }
 
@@ -253,6 +271,7 @@ function local_blueprints_clone_course(
     $admin = get_admin();
     $privilegeduserid = (int)$admin->id;
     $newcourseid = restore_dbops::create_new_course($fullname, $shortname, $categoryid);
+    $backupfile = null;
 
     try {
         $backup = new backup_controller(
@@ -260,23 +279,34 @@ function local_blueprints_clone_course(
             $blueprintid,
             backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO,
-            backup::MODE_IMPORT,
+            backup::MODE_SAMESITE,
             $privilegeduserid
         );
+        $backupid = $backup->get_backupid();
+        $backupbasepath = $backup->get_plan()->get_basepath();
         local_blueprints_disable_user_data_settings($backup->get_plan());
         $backup->execute_plan();
-        $backupid = $backup->get_backupid();
+        $backupresults = $backup->get_results();
+        $backupfile = $backupresults['backup_destination'];
         $backup->destroy();
+
+        if (!file_exists($backupbasepath . '/moodle_backup.xml')) {
+            $backupfile->extract_to_pathname(
+                get_file_packer('application/vnd.moodle.backup'),
+                $backupbasepath
+            );
+        }
 
         $restore = new restore_controller(
             $backupid,
             $newcourseid,
             backup::INTERACTIVE_NO,
-            backup::MODE_IMPORT,
+            backup::MODE_SAMESITE,
             $privilegeduserid,
             backup::TARGET_NEW_COURSE
         );
         local_blueprints_disable_user_data_settings($restore->get_plan());
+        local_blueprints_restore_enrolment_methods($restore->get_plan());
 
         $precheck = $restore->execute_precheck();
         if (!$precheck) {
@@ -294,6 +324,8 @@ function local_blueprints_clone_course(
 
         $restore->execute_plan();
         $restore->destroy();
+        $backupfile->delete();
+        $backupfile = null;
 
         update_course((object)[
             'id' => $newcourseid,
@@ -303,6 +335,9 @@ function local_blueprints_clone_course(
             'visible' => $CFG->coursevisible ?? 1,
         ]);
     } catch (Throwable $e) {
+        if ($backupfile) {
+            $backupfile->delete();
+        }
         delete_course($newcourseid, false);
         throw $e;
     }

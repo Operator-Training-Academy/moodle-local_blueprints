@@ -7,7 +7,7 @@ A course blueprint system for Moodle that lets administrators designate courses 
 - **Blueprint Library** — Mark any Moodle course category as a blueprint repository; all courses within it (and its subcategories) become available as templates.
 - **Browse & Search** — Card-based blueprint browser with category filtering and full-text search across course name, short name, and ID number.
 - **Guided Course Creation** — A clean 3-step wizard walks users through selecting a destination category, confirming course names, and setting a start date.
-- **Automatic User Data Stripping** — Cloned courses are completely clean — no enrolments, grades, roles, logs, comments, badges, or calendar events carry over.
+- **Automatic User Data Stripping** — Cloned courses retain configured enrolment methods but no enrolled users, grades, roles, logs, comments, badges, or calendar events.
 - **Safe & Atomic** — If anything fails during the clone process, the partially created course is automatically deleted.
 - **Seamless Integration** — A "Blueprints" button is automatically injected next to the "Create new course" button on course management pages, category pages, and the dashboard.
 - **Event Support** — Fires a `course_created_from_blueprint` event on every successful clone for logging and integration.
@@ -65,9 +65,9 @@ This capability controls access to the blueprint browser and the clone operation
 
 Under the hood, Blueprints uses Moodle's built-in backup and restore system:
 
-1. The blueprint course is backed up (non-interactive, import mode) using the site admin's privileges.
-2. All user-related settings are systematically disabled — enrolments, grades, roles, comments, logs, badges, calendars, and any setting containing `role`, `permission`, or `enrol`.
-3. The backup is restored into a newly created empty course.
+1. The blueprint course is backed up and restored non-interactively using the site admin's privileges.
+2. All user-related settings are systematically disabled: enrolled users, grades, roles, comments, logs, badges, calendars, and permissions. Configured enrolment methods are retained.
+3. The backup is restored into a newly created empty course with its enrolment methods but no user enrolments.
 4. The new course is updated with the user-provided full name, short name, and start date.
 5. If any error occurs, the partially created course is deleted automatically.
 
