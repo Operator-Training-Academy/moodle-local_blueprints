@@ -240,7 +240,8 @@ function local_blueprints_clone_course(
     string $shortname,
     int $categoryid,
     int $startdate = 0,
-    ?int $actorid = null
+    ?int $actorid = null,
+    bool $regeneratequizpasswords = false
 ): int {
     global $CFG, $USER;
 
@@ -324,6 +325,9 @@ function local_blueprints_clone_course(
 
         $restore->execute_plan();
         $restore->destroy();
+        if ($regeneratequizpasswords) {
+            local_blueprints_replace_quiz_passwords($newcourseid);
+        }
         $backupfile->delete();
         $backupfile = null;
 
@@ -356,6 +360,89 @@ function local_blueprints_clone_course(
     ])->trigger();
 
     return $newcourseid;
+}
+
+/**
+ * Generates a quiz password using the configured character policy.
+ *
+ * @return string
+ */
+function local_blueprints_generate_quiz_password(): string {
+    $avoidambiguous = get_config('local_blueprints', 'quizpasswordavoidambiguous');
+    $avoidambiguous = $avoidambiguous === false || (bool)$avoidambiguous;
+    $uppercase = get_config('local_blueprints', 'quizpassworduppercase');
+    $lowercase = get_config('local_blueprints', 'quizpasswordlowercase');
+    $numbers = get_config('local_blueprints', 'quizpasswordnumbers');
+    $symbols = get_config('local_blueprints', 'quizpasswordsymbols');
+    $characterclasses = [];
+
+    if ($uppercase === false || $uppercase) {
+        $characterclasses[] = $avoidambiguous ? 'ABCDEFGHJKLMNPQRSTUVWXYZ' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    }
+    if ($lowercase === false || $lowercase) {
+        $characterclasses[] = $avoidambiguous ? 'abcdefghijkmnpqrstuvwxyz' : 'abcdefghijklmnopqrstuvwxyz';
+    }
+    if ($numbers === false || $numbers) {
+        $characterclasses[] = $avoidambiguous ? '23456789' : '0123456789';
+    }
+    if ($symbols === false || $symbols) {
+        $characterclasses[] = '!#$%&*+-=?@^_';
+    }
+
+    $length = get_config('local_blueprints', 'quizpasswordlength');
+    $length = $length === false ? 12 : (int)$length;
+    if (!$characterclasses || $length < count($characterclasses) || $length < 4 || $length > 255) {
+        throw new moodle_exception('invalidquizpasswordsettings', 'local_blueprints');
+    }
+
+    $password = [];
+    foreach ($characterclasses as $characters) {
+        $password[] = $characters[random_int(0, strlen($characters) - 1)];
+    }
+
+    $characters = implode('', $characterclasses);
+    while (count($password) < $length) {
+        $password[] = $characters[random_int(0, strlen($characters) - 1)];
+    }
+
+    for ($index = count($password) - 1; $index > 0; $index--) {
+        $swapindex = random_int(0, $index);
+        [$password[$index], $password[$swapindex]] = [$password[$swapindex], $password[$index]];
+    }
+
+    return implode('', $password);
+}
+
+/**
+ * Replaces all default and override passwords for quizzes in a course.
+ *
+ * @param int $courseid Course ID.
+ */
+function local_blueprints_replace_quiz_passwords(int $courseid): void {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+    if (!$dbman->table_exists(new xmldb_table('quiz'))) {
+        return;
+    }
+
+    $quizids = $DB->get_fieldset_select('quiz', 'id', 'course = :courseid', ['courseid' => $courseid]);
+    foreach ($quizids as $quizid) {
+        $DB->set_field('quiz', 'password', local_blueprints_generate_quiz_password(), ['id' => $quizid]);
+    }
+
+    if (!$dbman->table_exists(new xmldb_table('quiz_overrides'))) {
+        return;
+    }
+
+    $overridesql = 'SELECT qo.id
+                      FROM {quiz_overrides} qo
+                      JOIN {quiz} q ON q.id = qo.quiz
+                     WHERE q.course = :courseid';
+    $overrideids = $DB->get_fieldset_sql($overridesql, ['courseid' => $courseid]);
+    foreach ($overrideids as $overrideid) {
+        $DB->set_field('quiz_overrides', 'password', local_blueprints_generate_quiz_password(), ['id' => $overrideid]);
+    }
 }
 
 function local_blueprints_enqueue_launch_button(): void {

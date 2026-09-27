@@ -50,5 +50,54 @@ if ($hassiteconfig) {
         PARAM_TEXT
     ));
 
+    $settings->add(new admin_setting_heading(
+        'local_blueprints/quizpasswordsettings',
+        get_string('quizpasswordsettings', 'local_blueprints'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_blueprints/quizpasswordlength',
+        get_string('quizpasswordlength', 'local_blueprints'),
+        get_string('quizpasswordlength_desc', 'local_blueprints'),
+        12,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_blueprints/quizpassworduppercase',
+        get_string('quizpassworduppercase', 'local_blueprints'),
+        get_string('quizpassworduppercase_desc', 'local_blueprints'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_blueprints/quizpasswordlowercase',
+        get_string('quizpasswordlowercase', 'local_blueprints'),
+        get_string('quizpasswordlowercase_desc', 'local_blueprints'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_blueprints/quizpasswordnumbers',
+        get_string('quizpasswordnumbers', 'local_blueprints'),
+        get_string('quizpasswordnumbers_desc', 'local_blueprints'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_blueprints/quizpasswordsymbols',
+        get_string('quizpasswordsymbols', 'local_blueprints'),
+        get_string('quizpasswordsymbols_desc', 'local_blueprints'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_blueprints/quizpasswordavoidambiguous',
+        get_string('quizpasswordavoidambiguous', 'local_blueprints'),
+        get_string('quizpasswordavoidambiguous_desc', 'local_blueprints'),
+        1
+    ));
+
     $ADMIN->add('localplugins', $settings);
 }

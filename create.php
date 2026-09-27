@@ -70,6 +70,7 @@ $formdata = [
     'fullname' => $wizardstate['fullname'] ?? optional_param('fullname', $blueprint->fullname, PARAM_TEXT),
     'shortname' => $wizardstate['shortname'] ?? optional_param('shortname', '', PARAM_TEXT),
     'startdate' => $wizardstate['startdate'] ?? optional_param('startdate', usergetmidnight(time()), PARAM_INT),
+    'regeneratequizpasswords' => $wizardstate['regeneratequizpasswords'] ?? optional_param('regeneratequizpasswords', 0, PARAM_BOOL),
 ];
 if (trim($formdata['fullname']) === '') {
     $formdata['fullname'] = $blueprint->fullname;
@@ -105,6 +106,7 @@ if ($isback) {
         'fullname' => trim($data->fullname),
         'shortname' => trim($data->shortname),
         'startdate' => (int)$data->startdate,
+        'regeneratequizpasswords' => (bool)$data->regeneratequizpasswords,
     ];
     if ($formdata['fullname'] === '') {
         $formdata['fullname'] = $blueprint->fullname;
@@ -123,7 +125,8 @@ if ($isback) {
             $formdata['shortname'],
             (int)$formdata['categoryid'],
             (int)$formdata['startdate'],
-            (int)$USER->id
+            (int)$USER->id,
+            (bool)$formdata['regeneratequizpasswords']
         );
 
         unset($SESSION->local_blueprints_wizard[$blueprintid]);
@@ -143,6 +146,7 @@ if ($displaystep !== $requestedstep) {
         'fullname' => $formdata['fullname'],
         'shortname' => $formdata['shortname'],
         'startdate' => (int)$formdata['startdate'],
+        'regeneratequizpasswords' => (bool)$formdata['regeneratequizpasswords'],
     ];
     redirect(new moodle_url('/local/blueprints/create.php', [
         'blueprintid' => $blueprintid,

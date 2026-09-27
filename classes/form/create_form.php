@@ -52,6 +52,8 @@ class create_form extends \moodleform {
             $mform->setType('shortname', PARAM_TEXT);
             $mform->addElement('hidden', 'startdate');
             $mform->setType('startdate', PARAM_INT);
+            $mform->addElement('hidden', 'regeneratequizpasswords');
+            $mform->setType('regeneratequizpasswords', PARAM_BOOL);
 
             $mform->addElement('html', \html_writer::start_div('local-blueprints-create-step'));
             $mform->addElement('html', \html_writer::tag('h3', get_string('stepcategory', 'local_blueprints')));
@@ -64,6 +66,8 @@ class create_form extends \moodleform {
             $mform->setType('categoryid', PARAM_INT);
             $mform->addElement('hidden', 'startdate');
             $mform->setType('startdate', PARAM_INT);
+            $mform->addElement('hidden', 'regeneratequizpasswords');
+            $mform->setType('regeneratequizpasswords', PARAM_BOOL);
 
             $mform->addElement('html', \html_writer::start_div('local-blueprints-create-step'));
             $mform->addElement('html', \html_writer::tag('h3', get_string('stepnames', 'local_blueprints')));
@@ -91,6 +95,13 @@ class create_form extends \moodleform {
             $mform->addElement('date_selector', 'startdate', get_string('startdate', 'local_blueprints'));
             $mform->setType('startdate', PARAM_INT);
             $mform->addRule('startdate', null, 'required', null, 'client');
+            $mform->addElement(
+                'advcheckbox',
+                'regeneratequizpasswords',
+                get_string('regeneratequizpasswords', 'local_blueprints')
+            );
+            $mform->setType('regeneratequizpasswords', PARAM_BOOL);
+            $mform->addHelpButton('regeneratequizpasswords', 'regeneratequizpasswords', 'local_blueprints');
             $mform->addElement('html', \html_writer::end_div());
         }
 
