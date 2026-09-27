@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_blueprints';
-$plugin->version = 2026092400;
+$plugin->version = 2026092800;
 $plugin->requires = 2022041900;
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v0.8';
+$plugin->release = 'v0.9';
